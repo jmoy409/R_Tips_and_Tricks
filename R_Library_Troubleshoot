@@ -1,0 +1,9 @@
+#Having Trouble install a package? Check where you are pulling from
+libPaths()
+"C:/Users/jmoy/Documents/R/win-library/3.6" "C:/Program Files/R/R-devel/library"          
+#I want the second path!
+> .libPaths()[-1]
+[1] "C:/Program Files/R/R-devel/library"
+
+#specified to pull from second lib path
+> install.packages('rlang', .libPaths()[-1])

@@ -1,0 +1,75 @@
+library(shiny)
+require(data.table)
+require(dplyr)
+require(tidyr)
+library(shinyjs)
+require(shinydashboard)
+require(dygraphs)
+
+
+
+
+
+###
+#dashboard
+ui <- dashboardPage(skin="blue",
+                    dashboardHeader(title="Shiny Draft", titleWidth = 250,
+                                    #link for picture below                
+                                    tags$li(a(href = 'www_site',
+                                              #need to put logo in www folder for shiny                
+                                              img(src = '.png',
+                                                  title = "text_to_display", height = "30px"),
+                                              style = "padding-top:10px; padding-bottom:10px;"),
+                                            class = "dropdown")),
+                    dashboardSidebar(width=250,
+                                     sidebarMenu(
+                                       menuItem("Business Solutions AAA KPIs", tabName = "dummy table", icon=icon("table"), startExpanded=F,
+                                                menuSubItem("Total Active Devices", tabName="Total_Flex_Devices")
+                                       ))), 
+                    dashboardBody(
+                      tabItems(
+                        tabItem(tabName= "Total_Flex_Devices",
+                                fluidRow(
+                                  DT::dataTableOutput("Total_Flex_Devices_DT"),
+                                  dygraphOutput("T_Flex_Devices_DY_Graph")
+                                ))
+                      )))
+
+server <- function(input,output){
+  
+  df <- data.frame(Date = c(as.Date('10/07/2020'),as.Date('10/09/2020')), Status=c('Working','pending confirmation'))
+  
+  output$Total_Flex_Devices_DT <- DT::renderDataTable(server=FALSE,{ #server defaults to true, which only downloads displayed data. Without server=FALSE, would also show processing....
+    DT::datatable(df, 
+                  selection = list(target="column"), #default is row
+                  extensions = c('FixedColumns','Buttons','KeyTable','Scroller'), #removed 'ColReorder', 'RowReorder'
+                  rownames=FALSE,class = 'cell-border stripe',filter="top",
+                  options = list(searching=TRUE,
+                                 autoWidth=FALSE,
+                                 keys=TRUE,
+                                 scroller=T,
+                                 scrollY=400,
+                                 rowReorder=T,
+                                 colReorder = TRUE,
+                                 paging=T,
+                                 dom = 'Bfrtip',
+                                 scrollX=T,
+                                 buttons = list('copy',
+                                                list(
+                                                  extend= 'csv',
+                                                  filename = paste('Total Active Devices',"-",as.character(Sys.Date()-1))),
+                                                list(
+                                                  extend= 'excel',
+                                                  filename = paste('Total Active Devices',"-",as.character(Sys.Date()-1))),
+                                                list(
+                                                  extend = 'pdf',
+                                                  pageSize = 'A0',
+                                                  orientation = 'landscape',
+                                                  filename = paste('Total Active Devices',"-",as.character(Sys.Date()-1))),
+                                                'print',I('colvis'))
+                  ))#%>%
+      #formatDate("Start_Date", method="toLocaleDateString")# %>%
+  })
+  }
+
+shinyApp(ui=ui, server=server)
